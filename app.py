@@ -260,31 +260,58 @@ if search_clicked:  # L180
                 "end_label": end_label,  # L208f
             }  # L208g
         
-        results = st.session_state["last_results"]  # L209
-        route = results["route"]  # L210
-        top_stations = results["top_stations"]  # L211
-        reference_price = results["reference_price"]  # L212
-        start_label = results["start_label"]  # L213
-        end_label = results["end_label"]  # L214
+  #      results = st.session_state["last_results"]  # L209
+  #      route = results["route"]  # L210
+  #      top_stations = results["top_stations"]  # L211
+  #      reference_price = results["reference_price"]  # L212
+  #      start_label = results["start_label"]  # L213
+  #      end_label = results["end_label"]  # L214
 
-        st.subheader("Route")  # L215
-        st.write(f"**Start:** {start_label}")  # L216
-        st.write(f"**Ziel:** {end_label}")  # L217
-        st.write(f"**Direkte Fahrzeit:** {route['duration_min']:.1f} Minuten")  # L218
-        st.write(f"**Direkte Distanz:** {route['distance_km']:.1f} km")  # L219
-        st.write(f"**Referenzpreis nahe Start/Ziel:** {reference_price:.3f} €/l")  # L220
+  #      st.subheader("Route")  # L215
+  #      st.write(f"**Start:** {start_label}")  # L216
+  #      st.write(f"**Ziel:** {end_label}")  # L217
+  #      st.write(f"**Direkte Fahrzeit:** {route['duration_min']:.1f} Minuten")  # L218
+  #      st.write(f"**Direkte Distanz:** {route['distance_km']:.1f} km")  # L219
+  #      st.write(f"**Referenzpreis nahe Start/Ziel:** {reference_price:.3f} €/l")  # L220
 
-        if not top_stations:  # L221
-            st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L222
-        else:  # L223
-            st.subheader("Beste 3 Tankoptionen")  # L224
-            table_rows = []  # L225
-            for index, station in enumerate(top_stations, start=1):  # L226
-                table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L227
-            st.dataframe(pd.DataFrame(table_rows), use_container_width=True)  # L228
+  #      if not top_stations:  # L221
+  #          st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L222
+  #      else:  # L223
+  #          st.subheader("Beste 3 Tankoptionen")  # L224
+  #          table_rows = []  # L225
+  #          for index, station in enumerate(top_stations, start=1):  # L226
+  #              table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L227
+  #          st.dataframe(pd.DataFrame(table_rows), use_container_width=True)  # L228
 
-            route_map = build_map(route["coords_latlon"], top_stations)  # L229
-            st_folium(route_map, width=1000, height=600)  # L230
+  #          route_map = build_map(route["coords_latlon"], top_stations)  # L229
+  #          st_folium(route_map, width=1000, height=600)  # L230
 
-    except Exception as error:  # L231
-        st.error(f"Fehler: {error}")  # L232
+    except Exception as error:  # L230a
+        st.error(f"Fehler: {error}")  # L230b
+
+if st.session_state["last_results"] is not None:  # L231
+    results = st.session_state["last_results"]  # L232
+    route = results["route"]  # L233
+    top_stations = results["top_stations"]  # L234
+    reference_price = results["reference_price"]  # L235
+    start_label = results["start_label"]  # L236
+    end_label = results["end_label"]  # L237
+
+    st.subheader("Route")  # L238
+    st.write(f"**Start:** {start_label}")  # L239
+    st.write(f"**Ziel:** {end_label}")  # L240
+    st.write(f"**Direkte Fahrzeit:** {route['duration_min']:.1f} Minuten")  # L241
+    st.write(f"**Direkte Distanz:** {route['distance_km']:.1f} km")  # L242
+    st.write(f"**Referenzpreis nahe Start/Ziel:** {reference_price:.3f} €/l")  # L243
+
+    if not top_stations:  # L244
+        st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L245
+    else:  # L246
+        st.subheader("Beste 3 Tankoptionen")  # L247
+        table_rows = []  # L248
+        for index, station in enumerate(top_stations, start=1):  # L249
+            table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L250
+        st.dataframe(pd.DataFrame(table_rows), use_container_width=True)  # L251
+
+        route_map = build_map(route["coords_latlon"], top_stations)  # L252
+        st_folium(route_map, width=1000, height=600)  # L253
