@@ -1,5 +1,7 @@
 import math  # L001
+import statistics # L001a
 import time  # L002
+from urllib.parse import quote_plus  # L002a
 from typing import Dict, List, Tuple, Any  # L003
 
 import requests  # L004
@@ -172,6 +174,12 @@ def score_station(station: Dict[str, Any], reference_price: float, tank_liters: 
     station["score"] = score  # L145
     return station  # L146
 
+def build_google_maps_navigation_url(start_lat: float, start_lon: float, station_lat: float, station_lon: float, end_lat: float, end_lon: float) -> str:  # L146a
+    """Erstellt einen Google-Maps-Link für Start -> Tankstelle -> Ziel."""  # L146b
+    origin = quote_plus(f"{start_lat},{start_lon}")  # L146c
+    waypoint = quote_plus(f"{station_lat},{station_lon}")  # L146d
+    destination = quote_plus(f"{end_lat},{end_lon}")  # L146e
+    return f"https://www.google.com/maps/dir/?api=1&origin={origin}&destination={destination}&waypoints={waypoint}&travelmode=driving"  # L146f
 
 # ------------------------------------------------------------  # L147
 # Karte erstellen  # L148
@@ -215,6 +223,7 @@ with st.sidebar:  # L165
 # Hauptlogik ausführen, wenn Button geklickt wurde  # L178
 # ------------------------------------------------------------  # L179
 if search_clicked:  # L180
+    run_start_time = time.time()  # L180a
     try:  # L181
         with st.spinner("Berechne Route und suche Tankstellen..."):  # L182
             if direction == "Rückweg":  # L183
@@ -239,7 +248,7 @@ if search_clicked:  # L180
             reference_candidates = [station for station in start_stations + end_stations if station.get("isOpen") and station.get("price")]  # L197
             if not reference_candidates:  # L198
                 raise ValueError("Keine offene Referenz-Tankstelle nahe Start oder Ziel gefunden.")  # L199
-            reference_price = max(float(station["price"]) for station in reference_candidates)  # L200b
+            reference_price = statistics.median(float(station["price"]) for station in reference_candidates)  # L200c
 
             candidate_stations = sorted(corridor_stations, key=lambda station: float(station["price"]))[:30]  # L201
             scored_stations = []  # L202
@@ -247,6 +256,7 @@ if search_clicked:  # L180
             for station in candidate_stations:  # L203
                 via_route = get_route_via_station(start_lat, start_lon, station["lat"], station["lng"], end_lat, end_lon)  # L204
                 scored_station = score_station(station, reference_price, tank_liters, route["duration_min"], via_route["duration_min"], money_weight_percent / 100)  # L205
+                scored_station["navigation_url"] = build_google_maps_navigation_url(start_lat, start_lon, station["lat"], station["lng"], end_lat, end_lon)  # L205a
                 if scored_station["extra_time_min"] <= max_extra_time_min:  # L206
                     scored_stations.append(scored_station)  # L207
 
@@ -258,7 +268,11 @@ if search_clicked:  # L180
                 "reference_price": reference_price,  # L208d
                 "start_label": start_label,  # L208e
                 "end_label": end_label,  # L208f
-            }  # L208g
+                "runtime_seconds": round(time.time() - run_start_time, 1),  # L208g
+                "ors_estimated_calls": 3 + len(candidate_stations),  # L208h
+                "tankerkoenig_estimated_calls": 2 + len(route_search_points),  # L208i
+                "checked_candidates": len(candidate_stations),  # L208j
+            }  # L208k
         
   #      results = st.session_state["last_results"]  # L209
   #      route = results["route"]  # L210
@@ -272,7 +286,7 @@ if search_clicked:  # L180
   #      st.write(f"**Ziel:** {end_label}")  # L217
   #      st.write(f"**Direkte Fahrzeit:** {route['duration_min']:.1f} Minuten")  # L218
   #      st.write(f"**Direkte Distanz:** {route['distance_km']:.1f} km")  # L219
-  #      st.write(f"**Referenzpreis nahe Start/Ziel:** {reference_price:.3f} €/l")  # L220
+  #      st.write(f"**Referenzpreis Median nahe Start/Ziel:** {reference_price:.3f} €/l")  # L220
 
   #      if not top_stations:  # L221
   #          st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L222
@@ -297,6 +311,11 @@ if st.session_state["last_results"] is not None:  # L231
     start_label = results["start_label"]  # L236
     end_label = results["end_label"]  # L237
 
+    runtime_seconds = results.get("runtime_seconds")  # L237a
+    ors_estimated_calls = results.get("ors_estimated_calls")  # L237b
+    tankerkoenig_estimated_calls = results.get("tankerkoenig_estimated_calls")  # L237c
+    checked_candidates = results.get("checked_candidates")  # L237d
+    
     st.subheader("Route")  # L238
     st.write(f"**Start:** {start_label}")  # L239
     st.write(f"**Ziel:** {end_label}")  # L240
@@ -313,5 +332,18 @@ if st.session_state["last_results"] is not None:  # L231
             table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L250
         st.dataframe(pd.DataFrame(table_rows), use_container_width=True)  # L251
 
+        st.subheader("Navigation starten")  # L251a
+        for index, station in enumerate(top_stations, start=1):  # L251b
+            label = f"{index}. Route über {station.get('brand') or station.get('name', 'Tankstelle')} starten"  # L251c
+            st.link_button(label, station["navigation_url"])  # L251d 
+
         route_map = build_map(route["coords_latlon"], top_stations)  # L252
         st_folium(route_map, width=1000, height=600)  # L253
+
+    st.caption(  # L254
+        f"Info: Diese Suche hat ca. {runtime_seconds} Sekunden gedauert. "  # L255
+        f"Geschätztes Anfragebudget: OpenRouteService ca. {ors_estimated_calls} Requests, "  # L256
+        f"Tankerkönig ca. {tankerkoenig_estimated_calls} Requests. "  # L257
+        f"Geprüfte Tankstellen-Kandidaten: {checked_candidates}. "  # L258
+        "Durch Caching können echte API-Aufrufe niedriger sein."  # L259
+    )  # L260
