@@ -194,6 +194,9 @@ def build_map(route_coords_latlon: List[Tuple[float, float]], top_stations: List
 st.title("⛽ Tankroute")  # L163
 st.write("Findet günstige Tankstellen auf deinem Pendelweg und bewertet Preisersparnis gegen Zusatzzeit.")  # L164
 
+if "last_results" not in st.session_state:  # L164a
+    st.session_state["last_results"] = None  # L164b
+
 with st.sidebar:  # L165
     st.header("Eingaben")  # L166
     start_address = st.text_input("Startadresse", "Karlsruhe Gutenbergplatz")  # L167
@@ -249,24 +252,36 @@ if search_clicked:  # L180
 
             top_stations = sorted(scored_stations, key=lambda station: station["score"], reverse=True)[:3]  # L208
 
-        st.subheader("Route")  # L209
-        st.write(f"**Start:** {start_label}")  # L210
-        st.write(f"**Ziel:** {end_label}")  # L211
-        st.write(f"**Direkte Fahrzeit:** {route['duration_min']:.1f} Minuten")  # L212
-        st.write(f"**Direkte Distanz:** {route['distance_km']:.1f} km")  # L213
-        st.write(f"**Referenzpreis nahe Start/Ziel:** {reference_price:.3f} €/l")  # L214
+            st.session_state["last_results"] = {  # L208a
+                "route": route,  # L208b
+                "top_stations": top_stations,  # L208c
+                "reference_price": reference_price,  # L208d
+                "start_label": start_label,  # L208e
+                "end_label": end_label,  # L208f
+            }  # L208g
+        
+        results = st.session_state["last_results"]  # L209
+        route = results["route"]  # L210
+        top_stations = results["top_stations"]  # L211
+        reference_price = results["reference_price"]  # L212
+        start_label = results["start_label"]  # L213
+        end_label = results["end_label"]  # L214
 
-        if not top_stations:  # L215
-            st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L216
-        else:  # L217
-            st.subheader("Beste 3 Tankoptionen")  # L218
-            table_rows = []  # L219
-            for index, station in enumerate(top_stations, start=1):  # L220
-                table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L221
-            st.dataframe(pd.DataFrame(table_rows), use_container_width=True)  # L222
+        st.subheader("Route")  # L215
+        st.write(f"**Start:** {start_label}")  # L216
+        st.write(f"**Ziel:** {end_label}")  # L217
+        st.write(f"**Direkte Fahrzeit:** {route['duration_min']:.1f} Minuten")  # L218
+        st.write(f"**Direkte Distanz:** {route['distance_km']:.1f} km")  # L219
+        st.write(f"**Referenzpreis nahe Start/Ziel:** {reference_price:.3f} €/l")  # L220
 
-            route_map = build_map(route["coords_latlon"], top_stations)  # L223
-            st_folium(route_map, width=1000, height=600)  # L224
+        if not top_stations:  # L221
+            st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L222
+        else:  # L223
+            st.subheader("Beste 3 Tankoptionen")  # L224
+            table_rows = []  # L225
+            for index, station in enumerate(top_stations, start=1):  # L226
+                table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L227
+            st.dataframe(pd.DataFrame(table_rows), use_container_width=True)  # L228
 
-    except Exception as error:  # L225
-        st.error(f"Fehler: {error}")  # L226
+            route_map = build_map(route["coords_latlon"], top_stations)  # L229
+            st_folium(route_map, width=1000, height=600)  # L230
