@@ -256,7 +256,14 @@ if search_clicked:  # L180
             for station in candidate_stations:  # L203
                 via_route = get_route_via_station(start_lat, start_lon, station["lat"], station["lng"], end_lat, end_lon)  # L204
                 scored_station = score_station(station, reference_price, tank_liters, route["duration_min"], via_route["duration_min"], money_weight_percent / 100)  # L205
-                scored_station["navigation_url"] = build_google_maps_navigation_url(start_lat, start_lon, station["lat"], station["lng"], end_lat, end_lon)  # L205a
+                scored_station["navigation_url"] = build_google_maps_navigation_url(  # L205a
+                    start_lat,
+                    start_lon,
+                    station["lat"],
+                    station["lng"],
+                    end_lat,
+                    end_lon
+                )
                 if scored_station["extra_time_min"] <= max_extra_time_min:  # L206
                     scored_stations.append(scored_station)  # L207
 
