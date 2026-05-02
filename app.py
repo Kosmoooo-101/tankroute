@@ -239,7 +239,7 @@ if search_clicked:  # L180
             reference_candidates = [station for station in start_stations + end_stations if station.get("isOpen") and station.get("price")]  # L197
             if not reference_candidates:  # L198
                 raise ValueError("Keine offene Referenz-Tankstelle nahe Start oder Ziel gefunden.")  # L199
-            reference_price = min(float(station["price"]) for station in reference_candidates)  # L200
+            reference_price = max(float(station["price"]) for station in reference_candidates)  # L200b
 
             candidate_stations = sorted(corridor_stations, key=lambda station: float(station["price"]))[:30]  # L201
             scored_stations = []  # L202
