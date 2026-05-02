@@ -285,3 +285,6 @@ if search_clicked:  # L180
 
             route_map = build_map(route["coords_latlon"], top_stations)  # L229
             st_folium(route_map, width=1000, height=600)  # L230
+
+    except Exception as error:  # L231
+        st.error(f"Fehler: {error}")  # L232
