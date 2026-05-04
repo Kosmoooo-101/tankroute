@@ -207,8 +207,8 @@ if "last_results" not in st.session_state:  # L164a
 
 with st.sidebar:  # L165
     st.header("Eingaben")  # L166
-    start_address = st.text_input("Startadresse", "Karlsruhe Gutenbergplatz")  # L167
-    end_address = st.text_input("Zieladresse", "Gasometer Pforzheim")  # L168
+    start_address = st.text_input("Startadresse", "Geranienstraße Karlsruhe")  # L167
+    end_address = st.text_input("Zieladresse", "Restaurant Holzhof Pforzheim")  # L168
     direction = st.radio("Richtung", ["Hinweg", "Rückweg"])  # L169
     fuel_type = st.selectbox("Kraftstoff", ["diesel", "e5", "e10"], index=0)  # L170
     tank_liters = st.number_input("Tankmenge in Litern", min_value=5.0, max_value=120.0, value=60.0, step=5.0)  # L171
@@ -248,7 +248,7 @@ if search_clicked:  # L180
             reference_candidates = [station for station in start_stations + end_stations if station.get("isOpen") and station.get("price")]  # L197
             if not reference_candidates:  # L198
                 raise ValueError("Keine offene Referenz-Tankstelle nahe Start oder Ziel gefunden.")  # L199
-            reference_price = statistics.median(float(station["price"]) for station in reference_candidates)  # L200c
+            reference_price = statistics.median(float(station["price"]) for station in reference_candidates)  # L200c Median der Tankstellen ist Referenzpreis
 
             candidate_stations = sorted(corridor_stations, key=lambda station: float(station["price"]))[:30]  # L201
             scored_stations = []  # L202
@@ -267,7 +267,7 @@ if search_clicked:  # L180
                 if scored_station["extra_time_min"] <= max_extra_time_min:  # L206
                     scored_stations.append(scored_station)  # L207
 
-            top_stations = sorted(scored_stations, key=lambda station: station["score"], reverse=True)[:3]  # L208
+            top_stations = sorted(scored_stations, key=lambda station: station["score"], reverse=True)[:15]  # L208
 
             st.session_state["last_results"] = {  # L208a
                 "route": route,  # L208b
@@ -298,7 +298,7 @@ if search_clicked:  # L180
   #      if not top_stations:  # L221
   #          st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L222
   #      else:  # L223
-  #          st.subheader("Beste 3 Tankoptionen")  # L224
+  #          st.subheader("Beste 15 Tankoptionen")  # L224
   #          table_rows = []  # L225
   #          for index, station in enumerate(top_stations, start=1):  # L226
   #              table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L227
@@ -333,7 +333,7 @@ if st.session_state["last_results"] is not None:  # L231
     if not top_stations:  # L244
         st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L245
     else:  # L246
-        st.subheader("Beste 3 Tankoptionen")  # L247
+        st.subheader("Beste 15 Tankoptionen")  # L247
         table_rows = []  # L248
         for index, station in enumerate(top_stations, start=1):  # L249
             table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L250
