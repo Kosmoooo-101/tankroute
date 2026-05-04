@@ -208,7 +208,7 @@ if "last_results" not in st.session_state:  # L164a
 with st.sidebar:  # L165
     st.header("Eingaben")  # L166
     start_address = st.text_input("Startadresse", "Geranienstraße Karlsruhe")  # L167
-    end_address = st.text_input("Zieladresse", "Restaurant Holzhof Pforzheim")  # L168
+    end_address = st.text_input("Zieladresse", "Robert-Bauer-Straße Pforzheim")  # L168
     direction = st.radio("Richtung", ["Hinweg", "Rückweg"])  # L169
     fuel_type = st.selectbox("Kraftstoff", ["diesel", "e5", "e10"], index=0)  # L170
     tank_liters = st.number_input("Tankmenge in Litern", min_value=5.0, max_value=120.0, value=60.0, step=5.0)  # L171
@@ -280,32 +280,6 @@ if search_clicked:  # L180
                 "tankerkoenig_estimated_calls": 2 + len(route_search_points),  # L208i
                 "checked_candidates": len(candidate_stations),  # L208j
             }  # L208k
-        
-  #      results = st.session_state["last_results"]  # L209
-  #      route = results["route"]  # L210
-  #      top_stations = results["top_stations"]  # L211
-  #      reference_price = results["reference_price"]  # L212
-  #      start_label = results["start_label"]  # L213
-  #      end_label = results["end_label"]  # L214
-
-  #      st.subheader("Route")  # L215
-  #      st.write(f"**Start:** {start_label}")  # L216
-  #      st.write(f"**Ziel:** {end_label}")  # L217
-  #      st.write(f"**Direkte Fahrzeit:** {route['duration_min']:.1f} Minuten")  # L218
-  #      st.write(f"**Direkte Distanz:** {route['distance_km']:.1f} km")  # L219
-  #      st.write(f"**Referenzpreis Median nahe Start/Ziel:** {reference_price:.3f} €/l")  # L220
-
-  #      if not top_stations:  # L221
-  #          st.warning("Keine passende Tankstelle innerhalb des maximalen Umwegs gefunden.")  # L222
-  #      else:  # L223
-  #          st.subheader("Beste 15 Tankoptionen")  # L224
-  #          table_rows = []  # L225
-  #          for index, station in enumerate(top_stations, start=1):  # L226
-  #              table_rows.append({"Rang": index, "Name": station.get("name"), "Marke": station.get("brand"), "Ort": station.get("place"), "Preis €/l": station["price"], "Ersparnis €": round(station["saving_eur"], 2), "Zusatzzeit min": round(station["extra_time_min"], 1), "Gesamtfahrtzeit min": round(station["total_duration_min"], 1), "Score": round(station["score"], 2)})  # L227
-  #          st.dataframe(pd.DataFrame(table_rows), use_container_width=True)  # L228
-
-  #          route_map = build_map(route["coords_latlon"], top_stations)  # L229
-  #          st_folium(route_map, width=1000, height=600)  # L230
 
     except Exception as error:  # L230a
         st.error(f"Fehler: {error}")  # L230b
