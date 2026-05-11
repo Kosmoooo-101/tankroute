@@ -192,13 +192,32 @@ def build_map(route_coords_latlon: List[Tuple[float, float]], top_stations: List
     folium.PolyLine(route_coords_latlon, tooltip="Direktroute").add_to(route_map)  # L155
     for index, station in enumerate(top_stations, start=1):  # L156
         popup = f"{index}. {station.get('name', 'Tankstelle')}<br>{station.get('brand', '')}<br>{station['price']:.3f} €/l<br>+{station['extra_time_min']:.1f} min"  # L157
-        folium.CircleMarker(  # L173 - Erstellt einen robusten Kreis-Marker statt eines Icon-Markers.
-            location=[station["lat"], station["lng"]],  # L174 - Setzt Position des Markers.
-            radius=8,  # L175 - Setzt Markergröße.
-            popup=popup,  # L176 - Hinterlegt Popup-Text.
-            tooltip=f"{index}. {station.get('brand') or station.get('name', 'Tankstelle')}",  # L177 - Hinterlegt Kurzinfo beim Darüberfahren.
-            fill=True,  # L178 - Füllt den Kreis.
-        ).add_to(route_map)  # L179 - Fügt den Marker zur Karte hinzu.
+
+        folium.Marker(  # L173 - Erstellt Marker mit eigener HTML-Darstellung.
+            location=[station["lat"], station["lng"]],  # L174 - Setzt Markerposition.
+            popup=popup,  # L175 - Hinterlegt Popup-Text.
+            tooltip=f"{index}. {station.get('brand') or station.get('name', 'Tankstelle')}",  # L176 - Hinterlegt Kurzinfo beim Darüberfahren.
+            icon=folium.DivIcon(  # L177 - Erstellt eigenes HTML-Icon.
+                html=f"""  # L178 - Beginnt HTML für nummerierten Kreis.
+                <div style="
+                    font-size: 12px;
+                    font-weight: bold;
+                    color: white;
+                    background-color: green;
+                    border-radius: 50%;
+                    width: 24px;
+                    height: 24px;
+                    text-align: center;
+                    line-height: 24px;
+                    border: 2px solid white;
+                    box-shadow: 0 0 3px rgba(0,0,0,0.5);
+                ">
+                    {index}
+                </div>
+                """  # L191 - Zeigt die Rangnummer im Kreis an.
+            )  # L192 - Beendet DivIcon.
+        ).add_to(route_map)  # L193 - Fügt Marker zur Karte hinzu.
+    
         #folium.Marker(location=[station["lat"], station["lng"]], popup=popup, tooltip=f"{index}. {station.get('brand', station.get('name', 'Tankstelle'))}").add_to(route_map)  # L158
     return route_map  # L159
 
