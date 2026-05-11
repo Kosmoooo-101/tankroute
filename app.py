@@ -192,7 +192,14 @@ def build_map(route_coords_latlon: List[Tuple[float, float]], top_stations: List
     folium.PolyLine(route_coords_latlon, tooltip="Direktroute").add_to(route_map)  # L155
     for index, station in enumerate(top_stations, start=1):  # L156
         popup = f"{index}. {station.get('name', 'Tankstelle')}<br>{station.get('brand', '')}<br>{station['price']:.3f} €/l<br>+{station['extra_time_min']:.1f} min"  # L157
-        folium.Marker(location=[station["lat"], station["lng"]], popup=popup, tooltip=f"{index}. {station.get('brand', station.get('name', 'Tankstelle'))}").add_to(route_map)  # L158
+        folium.CircleMarker(  # L173 - Erstellt einen robusten Kreis-Marker statt eines Icon-Markers.
+            location=[station["lat"], station["lng"]],  # L174 - Setzt Position des Markers.
+            radius=8,  # L175 - Setzt Markergröße.
+            popup=popup,  # L176 - Hinterlegt Popup-Text.
+            tooltip=f"{index}. {station.get('brand') or station.get('name', 'Tankstelle')}",  # L177 - Hinterlegt Kurzinfo beim Darüberfahren.
+            fill=True,  # L178 - Füllt den Kreis.
+        ).add_to(route_map)  # L179 - Fügt den Marker zur Karte hinzu.
+        #folium.Marker(location=[station["lat"], station["lng"]], popup=popup, tooltip=f"{index}. {station.get('brand', station.get('name', 'Tankstelle'))}").add_to(route_map)  # L158
     return route_map  # L159
 
 
@@ -315,11 +322,11 @@ if st.session_state["last_results"] is not None:  # L231
 
         st.subheader("Navigation starten")  # L251a
         for index, station in enumerate(top_stations, start=1):  # L251b
-            label = f"{index}. Route über {station.get('brand') or station.get('name', 'Tankstelle')} starten"  # L251c
+            label = f"{index}. Route über {station.get('name', 'Tankstelle') or station.get('brand')} starten"  # L251c
             st.link_button(label, station["navigation_url"])  # L251d 
 
         route_map = build_map(route["coords_latlon"], top_stations)  # L252
-        st_folium(route_map, width=1000, height=600)  # L253
+        st_folium(route_map, width=700, height=400)  # L253
 
     st.caption(  # L254
         f"Info: Diese Suche hat ca. {runtime_seconds} Sekunden gedauert. "  # L255
