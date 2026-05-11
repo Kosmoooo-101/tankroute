@@ -198,7 +198,7 @@ def build_map(route_coords_latlon: List[Tuple[float, float]], top_stations: List
             popup=popup,  # L175 - Hinterlegt Popup-Text.
             tooltip=f"{index}. {station.get('brand') or station.get('name', 'Tankstelle')}",  # L176 - Hinterlegt Kurzinfo beim Darüberfahren.
             icon=folium.DivIcon(  # L177 - Erstellt eigenes HTML-Icon.
-                html=f"""  # L178 - Beginnt HTML für nummerierten Kreis.
+                html=f"""  <!-- L178 - Beginnt HTML für nummerierten Kreis.  -->
                 <div style="
                     font-size: 12px;
                     font-weight: bold;
